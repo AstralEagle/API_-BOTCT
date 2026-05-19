@@ -1,0 +1,16 @@
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model User {
+  id         String   @id @default(uuid())
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  username String @unique
+  name     String
+
+  email    String @unique
+  password String
+
+  games   Game[]
+  players Player[]
+
+  @@map("users")
+}

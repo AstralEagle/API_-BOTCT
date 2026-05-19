@@ -1,0 +1,43 @@
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Game {
+  id           String   @id @default(uuid()) // uuid() → String, pas Int
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  masterId     String   @map("master_id")
+  master       User     @relation(fields: [masterId], references: [id])
+  isBeging     Boolean  @map("is_beging") @default(false)
+  maxPlayer    Int      @map("max_player") @default(6) // @min/@max n'existent pas en Prisma
+  currentStage Int      @map("current_stage") @default(0)
+  players      Player[]
+
+  @@map("games")
+}
+
+model Player {
+  id         Int     @id @default(autoincrement())
+  gameId     String  @map("game_id")
+  userId     String? @map("user_id")
+  name       String
+  roleId     Int?    @map("role_id")
+  realRoleId Int?    @map("real_role_id")
+
+  game      Game  @relation(fields: [gameId], references: [id])
+  user      User? @relation(fields: [userId], references: [id])
+  role      Role? @relation("PlayerRole", fields: [roleId], references: [id])
+  realRole Role? @relation("PlayerRealRole", fields: [realRoleId], references: [id])
+
+  @@unique([gameId, name])
+  @@unique([gameId, realRoleId])
+  @@map("players")
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  team        Int
+
+  players     Player[] @relation("PlayerRole")
+  realPlayers Player[] @relation("PlayerRealRole")
+
+  @@map("roles")
+}
